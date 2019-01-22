@@ -114,6 +114,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Idea files
+.idea/
+
 # Addtional files if something doesn't work
-XLS_data/*.xls
-XLS_data/*.zip
+**/XLS_data/*.xls
+**/XLS_data/*.zip

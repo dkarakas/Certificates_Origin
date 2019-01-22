@@ -61,4 +61,4 @@ if __name__ == '__main__':
     dir_path = dir_path + "/XLS_data/Xantrex_Inverter_Data.zip.gpg"
     parser = xml_parser(dir_path)
     parser.decrypt_and_unzip()
-    parser.close()
+    # parser.close()
