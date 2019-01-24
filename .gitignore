@@ -120,3 +120,4 @@ dmypy.json
 # Addtional files if something doesn't work
 **/XLS_data/*.xls
 **/XLS_data/*.zip
+**/certs/*.cert

@@ -118,12 +118,14 @@ class xls_parser:
         return list_of_certificates
 
     def create_json(self, list_of_certificates):
+        if not os.path.exists(dir_of_certs):
+            os.makedirs(dir_of_certs)
         for one_cert in list_of_certificates:
             cert = one_cert.create_json()
             file_name = dir_of_certs + one_cert.identity + "_" + one_cert.date + "_" + one_cert.time + ".cert"
             with open(file_name, "w+") as file:
                 json.dump(cert, file)
-            print("Certificate successfully created!")
+            print("Certificate successfully createdir_of_certsdir_of_certsd!")
 
     def extract_from_xls(self, xls_files):
         for xls_file in xls_files:
