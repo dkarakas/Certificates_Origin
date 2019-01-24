@@ -3,10 +3,11 @@ import os
 import glob
 import re
 import xlrd
+import certificate
 import pandas as pd
 
 
-class xml_parser:
+class xls_parser:
     def __init__(self, file_loc):
         if (file_loc[-3:] != "gpg"):
             raise ValueError("The script accepts only encrypted input")
@@ -35,7 +36,7 @@ class xml_parser:
         :return: A list of xls files that have been decrypted
         """
         attempts = 3
-        xml_files = list()
+        xls_files = list()
 
         while (self.decrypted == False and attempts > 0):
             password = input("Enter password to decrypt file:")
@@ -70,42 +71,57 @@ class xml_parser:
             match = re.search("Data Log [0-9]{2}-[0-9]{2}-[0-9]{4}\.xls", file + extension)
             # adds only xls files with daily log
             if match and extension == "xls":
-                xml_files.append(file + extension)
-        return xml_files
+                xls_files.append(file + extension)
+        return xls_files
 
-    def fix_file(self, abs_file):
+    def fix_first_line(self, abs_file):
+        """
+        :param abs_file: It is the absolute path to the file
+        :return:
+        """
         with open(abs_file, 'r+b') as file:
             content = file.readlines()  # not very good on memory
-            print(content)
-            print(content[2:])
+            file.truncate(0)
+            file.seek(0)  # otherwise the beginning of the file will be filled with null
             file.writelines(content[2:])
 
-    def extract_from_xml(self, xml_files):
-        for xml_file in xml_files:
-            xml_file = os.path.dirname(self.file_location) + "/" + xml_file
-            print(xml_file)
-            self.fix_file(xml_file)  # first line of each file corrupts the xml format and that is why here it is removed
+    def extract_manually(self, abs_file):
+        """
+        Extracts the information from the xls file mannually
+        :param abs_file: It is the absolute path to the file
+        :return: a list of certificates of origin for each reading
+        """
+        print("Attempting to extract data manually from the file!")
+        content = None
+        list_of_certificates = list()
+        with open(abs_file, 'r+b') as file:
+            content = file.readlines()  # not very good on memory
+        content = list(line.decode('utf8', 'ignore').strip() for line in content)
+        print(content)
 
-            # workbook = xlrd.open_workbook(xml_file)
-            # print(workbook.sheet_names())
+
+    def extract_from_xls(self, xls_files):
+        for xls_file in xls_files:
+            xls_file = os.path.dirname(self.file_location) + "/" + xls_file
+            print(xls_file)
+            self.fix_first_line(xls_file)  # first line of each file corrupts the xls format and that is why here it is removed
+
+            try:
+                #TODO: implement code with non corrupted file
+                workbook = xlrd.open_workbook(xls_file)
+                # print(workbook.sheet_names())
+            except xlrd.XLRDError as er:  # although Libre Office recognizes the file, xlrd doesn't recognize it.
+                print(er)
+                self.extract_manually(xls_file)
+
             return
-            # with open(os.path.dirname(self.file_location) + "/" + xml_file, 'rb') as file:
-            #     content = file.read()
-            #     each_row = content.decode('utf8', 'ignore').split('\t')
-            #     for row in each_row[1:]:
-            #         print(row)
-            # return
-
-            # print(os.path.dirname(self.file_location) + "/" + file)
-            # read = pd.read_csv(os.path.dirname(self.file_location) + "/" + file)
-            # print(read)
 
 
 if __name__ == '__main__':
     dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     dir_path = dir_path + "/XLS_data/Xantrex_Inverter_Data.zip.gpg"
-    parser = xml_parser(dir_path)
+    parser = xls_parser(dir_path)
     parser.close()
-    xml_files = parser.decrypt_and_unzip()
-    parser.extract_from_xml(xml_files)
-    parser.close()
+    xls_files = parser.decrypt_and_unzip()
+    parser.extract_from_xls(xls_files)
+    # parser.close()
