@@ -15,27 +15,25 @@ class certificate_origin:
          received by the plant or the owner of the associated energy, etc.
         """
         #TODO Place checkers for the values and raise errors
-        self.issuer = issuer
-        self.time = time
-        self.date = date
-        self.source_energy = source_energy
-        self.identity = identity
-        self.capacity = capacity
-        self.commissioning_date = commissioning_date
-        self.loc_of_gen = loc_of_gen
-        self.units = units
-        self.other_options = other_options
-
-        print("Empty certificated is created!")
+        self._issuer = issuer
+        self._time = time
+        self._date = date
+        self._source_energy = source_energy
+        self._identity = identity
+        self._capacity = capacity
+        self._commissioning_date = commissioning_date
+        self._loc_of_gen = loc_of_gen
+        self._units = units
+        self._other_options = other_options
 
     #issuer
     @property
     def issuer(self):
-        return self.issuer
+        return self._issuer
 
     @issuer.setter
-    def issure(self, issuer):
-        self.issuer = issuer
+    def issuer(self, issuer):
+        self._issuer = issuer
 
     @issuer.deleter
     def issuer(self):
@@ -44,11 +42,11 @@ class certificate_origin:
     #time
     @property
     def time(self):
-        return self.time
+        return self._time
 
     @time.setter
     def time(self, time):
-        self.time = time
+        self._time = time
 
     @time.deleter
     def time(self):
@@ -57,11 +55,11 @@ class certificate_origin:
     #date
     @property
     def date(self):
-        return self.date
+        return self._date
 
     @date.setter
     def date(self, date):
-        self.date = date
+        self._date = date
 
     @date.deleter
     def date(self):
@@ -70,11 +68,11 @@ class certificate_origin:
     #source_energy
     @property
     def source_energy(self):
-        return self.source_energy
+        return self._source_energy
 
     @source_energy.setter
     def source_energy(self, source_energy):
-        self.source_energy = source_energy
+        self._source_energy = source_energy
 
     @source_energy.deleter
     def source_energy(self):
@@ -83,11 +81,11 @@ class certificate_origin:
     #identity
     @property
     def identity(self):
-        return self.identity
+        return self._identity
 
     @identity.setter
     def identity(self, identity):
-        self.identity = identity
+        self._identity = identity
 
     @identity.deleter
     def identity(self):
@@ -96,11 +94,11 @@ class certificate_origin:
     #capacity
     @property
     def capacity(self):
-        return self.capacity
+        return self._capacity
 
     @capacity.setter
     def capacity(self, capacity):
-        self.capacity = capacity
+        self._capacity = capacity
 
     @capacity.deleter
     def capacity(self):
@@ -109,11 +107,11 @@ class certificate_origin:
     #commissioning_date
     @property
     def commissioning_date(self):
-        return self.commissioning_date
+        return self._commissioning_date
 
     @commissioning_date.setter
     def commissioning_date(self, commissioning_date):
-        self.commissioning_date = commissioning_date
+        self._commissioning_date = commissioning_date
 
     @commissioning_date.deleter
     def commissioning_date(self):
@@ -122,11 +120,11 @@ class certificate_origin:
     #loc_of_gen
     @property
     def loc_of_gen(self):
-        return self.loc_of_gen
+        return self._loc_of_gen
 
     @loc_of_gen.setter
     def loc_of_gen(self, loc_of_gen):
-        self.loc_of_gen = loc_of_gen
+        self._loc_of_gen = loc_of_gen
 
     @loc_of_gen.deleter
     def loc_of_gen(self):
@@ -135,11 +133,11 @@ class certificate_origin:
     #units
     @property
     def units(self):
-        return self.units
+        return self._units
 
     @units.setter
     def units(self, units):
-        self.units = units
+        self._units = units
 
     @units.deleter
     def units(self):
@@ -148,12 +146,40 @@ class certificate_origin:
     #other_options
     @property
     def other_options(self):
-        return self.other_options
+        return self._other_options
 
     @other_options.setter
-    def isother_optionssure(self, other_options):
-        self.other_options = other_options
+    def other_options(self, other_options):
+        self._other_options = other_options
 
     @other_options.deleter
     def other_options(self):
         pass
+
+    def __str__(self):
+        return "Issuer: " + self._issuer + " Time: " + self._time + " Date: " + self._date + " Source: " + \
+               self._source_energy + " Identity: " + self._identity + " Capacity: " + self._capacity + \
+               " Commision date:" + self._commissioning_date + " Location of gen: " + self._loc_of_gen + \
+                " Units: " + self._units + " Other Options: " + self._other_options + "\n"
+
+    def __repr__(self):
+        return "Issuer: " + self._issuer + " Time: " + self._time + " Date: " + self._date + " Source: " + \
+               self._source_energy + " Identity: " + self._identity + " Capacity: " + self._capacity + \
+               " Commision date:" + self._commissioning_date + " Location of gen: " + self._loc_of_gen + \
+                " Units: " + self._units + " Other Options: " + self._other_options + "\n"
+
+    def create_json(self):
+        cert = dict()
+        cert["issuer"] = self._issuer
+        cert["time"] = self._time
+        cert["data"] = self._date
+        cert["source_energy"] = self.source_energy
+        cert["identity"] = self._identity
+        cert["capacity"] = self._capacity
+        cert["commissioning_date"] = self._commissioning_date
+        cert["loc_of_gen"] = self._loc_of_gen
+        cert["units"] = self._units
+        cert["other_options"] = self._other_options
+        return cert
+
+

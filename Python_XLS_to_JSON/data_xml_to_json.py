@@ -3,8 +3,12 @@ import os
 import glob
 import re
 import xlrd
-import certificate
-import pandas as pd
+from certificate import certificate_origin
+import json
+# import pandas as pd
+
+dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))                 # Path to global dir
+dir_of_certs = dir_path + "/certs/"                                                     # Path to dir of certificates
 
 
 class xls_parser:
@@ -92,36 +96,54 @@ class xls_parser:
         :return: a list of certificates of origin for each reading
         """
         print("Attempting to extract data manually from the file!")
-        content = None
         list_of_certificates = list()
         with open(abs_file, 'r+b') as file:
             content = file.readlines()  # not very good on memory
         content = list(line.decode('utf8', 'ignore').strip() for line in content)
-        print(content)
+        serial_number = re.search(r' = ([a-zA-Z0-9]+)', content[3]).group(1)
+        for measurement in content[13:]:
+            measurement = list(element.strip() for element in measurement.split('\t'))
+            cert_for_measurement = certificate_origin()
+            cert_for_measurement.issuer = "TODO_Name" # TODO: actual issuer
+            cert_for_measurement.time = measurement[1]
+            cert_for_measurement.date = measurement[0]
+            cert_for_measurement.source_energy = "solar"  # TODO: allow for more
+            cert_for_measurement.identity = serial_number
+            cert_for_measurement.capacity = measurement[9]  # TODO: WHAT IS SUPPOSED TO BE THE CAPACITY
+            cert_for_measurement.commissioning_date = "01-23-2018"  # TODO: fix this currently random date
+            cert_for_measurement.loc_of_gen = "Waterloo"
+            cert_for_measurement.units = "AC Wh"
+            cert_for_measurement.other_options = "TODO: TO add"
+            list_of_certificates.append(cert_for_measurement)
+        return list_of_certificates
 
+    def create_json(self, list_of_certificates):
+        for one_cert in list_of_certificates:
+            cert = one_cert.create_json()
+            file_name = dir_of_certs + one_cert.identity + "_" + one_cert.date + "_" + one_cert.time + ".cert"
+            with open(file_name, "w+") as file:
+                json.dump(cert, file)
+            print("Certificate successfully created!")
 
     def extract_from_xls(self, xls_files):
         for xls_file in xls_files:
+            list_of_certificates = None
             xls_file = os.path.dirname(self.file_location) + "/" + xls_file
-            print(xls_file)
             self.fix_first_line(xls_file)  # first line of each file corrupts the xls format and that is why here it is removed
-
             try:
                 #TODO: implement code with non corrupted file
                 workbook = xlrd.open_workbook(xls_file)
-                # print(workbook.sheet_names())
             except xlrd.XLRDError as er:  # although Libre Office recognizes the file, xlrd doesn't recognize it.
                 print(er)
-                self.extract_manually(xls_file)
-
-            return
+                list_of_certificates = self.extract_manually(xls_file)
+            return list_of_certificates  # TODO: for now return ealry or too many certificates will be created!
 
 
 if __name__ == '__main__':
-    dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     dir_path = dir_path + "/XLS_data/Xantrex_Inverter_Data.zip.gpg"
     parser = xls_parser(dir_path)
     parser.close()
     xls_files = parser.decrypt_and_unzip()
-    parser.extract_from_xls(xls_files)
+    list_of_certificates = parser.extract_from_xls(xls_files)
+    parser.create_json(list_of_certificates)
     # parser.close()
