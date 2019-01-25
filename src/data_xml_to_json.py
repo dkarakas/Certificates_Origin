@@ -3,7 +3,7 @@ import os
 import glob
 import re
 import xlrd
-from certificate import certificate_origin
+from src.certificate import certificate_origin
 import json
 # import pandas as pd
 
@@ -95,7 +95,7 @@ class xls_parser:
         :param abs_file: It is the absolute path to the file
         :return: a list of certificates of origin for each reading
         """
-        print("Attempting to extract data manually from the file!")
+        print("Attempting to extract data manually from the xls files!")
         list_of_certificates = list()
         with open(abs_file, 'r+b') as file:
             content = file.readlines()  # not very good on memory
@@ -109,23 +109,31 @@ class xls_parser:
             cert_for_measurement.date = measurement[0]
             cert_for_measurement.source_energy = "solar"  # TODO: allow for more
             cert_for_measurement.identity = serial_number
-            cert_for_measurement.capacity = measurement[9]  # TODO: WHAT IS SUPPOSED TO BE THE CAPACITY
+            cert_for_measurement.capacity = "5 kWh"  # TODO: WHAT IS SUPPOSED TO BE THE CAPACITY
             cert_for_measurement.commissioning_date = "01-23-2018"  # TODO: fix this currently random date
             cert_for_measurement.loc_of_gen = "Waterloo"
-            cert_for_measurement.units = "AC Wh"
+            cert_for_measurement.units = measurement[7] + " AC Wh" # TODO: temperory since this is only a snapshot
             cert_for_measurement.other_options = "TODO: TO add"
             list_of_certificates.append(cert_for_measurement)
         return list_of_certificates
 
     def create_json(self, list_of_certificates):
+        """
+        :param list_of_certificates:  certificates should be passed from the function decrypt_and_unzip
+                                        # TODO: You should be able to generate the jason from folder of certs
+        :return: list of jsons parsed from the certificates
+        """
+        jsons_from_cert = list()
         if not os.path.exists(dir_of_certs):
             os.makedirs(dir_of_certs)
         for one_cert in list_of_certificates:
             cert = one_cert.create_json()
+            jsons_from_cert.append(cert)
             file_name = dir_of_certs + one_cert.identity + "_" + one_cert.date + "_" + one_cert.time + ".cert"
             with open(file_name, "w+") as file:
                 json.dump(cert, file)
-            print("Certificate successfully createdir_of_certsdir_of_certsd!")
+        print("Certificates created in folder certs!")
+        return jsons_from_cert
 
     def extract_from_xls(self, xls_files):
         for xls_file in xls_files:
